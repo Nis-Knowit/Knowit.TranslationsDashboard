@@ -1,0 +1,523 @@
+<div ng-controller="KnowitTranslationsDashboardController as vm">
+    <div class="custom-translations-dashboard">
+        <div class="dashboard-header">
+            <h1>
+                <i class="icon icon-book-alt"></i>
+                Translations Dashboard
+            </h1>
+        </div>
+        
+        <div class="dashboard-container">
+            <!-- Main Content -->
+            <div class="dashboard-content">
+                <div class="content-header">
+                    <h2>Translations</h2>
+                    <small ng-if="!vm.loading && vm.allItems">{{vm.allItems.length}} dictionary items</small>
+                    <button class="btn btn-success global-create-button" ng-click="vm.createNewItem()">
+                        <i class="icon icon-add"></i> Create New Translation
+                    </button>
+                </div>
+                
+                <!-- Search/Filter Section -->
+                <div class="search-section">
+                    <div class="search-row">
+                        <div class="search-label-container">
+                            <label class="search-label">
+                                Search
+                                <small>Search in both keys and translation values</small>
+                            </label>
+                        </div>
+                        <div class="search-input-container">
+                            <div class="search-input-with-button">
+                                <input type="text" 
+                                    class="search-input"
+                                    ng-model="vm.query" 
+                                    placeholder="Enter search text" 
+                                    ng-keypress="$event.keyCode === 13 && vm.searchAllDictionary()" />
+                                <button 
+                                    type="button"
+                                    class="btn btn-success search-btn"
+                                    ng-class="{'btn-busy': vm.allButtonState === 'busy'}"
+                                    ng-click="vm.searchAllDictionary()">
+                                    <span>Search</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Loading indicator -->
+                <div class="loading-indicator" ng-if="vm.loading">
+                    <div class="spinner">
+                        <div class="bounce1"></div>
+                        <div class="bounce2"></div>
+                        <div class="bounce3"></div>
+                    </div>
+                    <p>Loading...</p>
+                </div>
+                
+                <!-- Dictionary items hierarchical table view -->
+                <div class="translations-table" ng-if="!vm.loading && vm.hierarchyItems && vm.hierarchyItems.length">
+                    <table class="table table-bordered table-hover full-width-table">
+                        <colgroup>
+                            <col class="key-column">
+                            <col ng-repeat="lang in vm.allLanguages" class="lang-column">
+                            <col class="actions-column">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="key-column">
+                                    <span>Dictionary Key</span>
+                                    <button class="btn-sort" ng-click="vm.sortItems('key')">
+                                        <i class="icon" ng-class="{'icon-navigation-up': vm.sortDirection === 'asc', 'icon-navigation-down': vm.sortDirection === 'desc'}"></i>
+                                    </button>
+                                </th>
+                                <th ng-repeat="lang in vm.allLanguages" class="lang-column">
+                                    <span>{{lang}}</span>
+                                </th>
+                                <th class="actions-column">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Hierarchical rows rendered recursively -->
+                            <tr ng-repeat="node in vm.paginatedHierarchy" ng-class="{'parent-row': !node.isLeaf}">
+                                <td class="dictionary-key">
+                                    <div class="key-with-toggle" ng-style="{'padding-left': node._level * 20 + 'px'}">
+                                        <button ng-if="!node.isLeaf" 
+                                                class="btn-toggle" 
+                                                ng-click="vm.toggleNode(node)">
+                                            <i class="icon" 
+                                               ng-class="{'icon-navigation-down': node._expanded, 'icon-navigation-right': !node._expanded}">
+                                            </i>
+                                        </button>
+                                        <span ng-if="node.isLeaf" class="key-spacer"></span>
+                                        <span>{{node.key}}</span>
+                                    </div>
+                                </td>
+                                <td ng-repeat="lang in vm.allLanguages" class="translation-value-cell">
+                                    <div class="translation-value" title="{{vm.getNodeValue(node, lang)}}">
+                                        {{vm.getNodeValue(node, lang) || 'No translation'}}
+                                    </div>
+                                </td>
+                                <td class="actions-cell">
+                                    <div class="btn-group action-buttons">
+                                        <button class="btn btn-xs btn-default" ng-click="vm.editAllTranslations(node)" title="Edit all translations">
+                                            <i class="icon icon-edit"></i>
+                                        </button>
+                                        <button class="btn btn-xs btn-success" ng-click="vm.createChildItem(node)" title="Create child translation">
+                                            <i class="icon icon-add"></i>
+                                        </button>
+                                        <button class="btn btn-xs btn-danger" ng-click="vm.confirmDelete(node)" title="Delete translation">
+                                            <i class="icon icon-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <!-- Pagination -->
+                    <div class="pagination-container">
+                        <div class="pagination-info">
+                            <div>Showing {{vm.getDisplayedItemsRange()}} of {{vm.hierarchyItems.length}} root items</div>
+                            <div class="pagination-expanded-note" ng-if="vm.paginatedHierarchy.length > vm.rootItemsPerPage">
+                                <small>{{vm.paginatedHierarchy.length}} items displayed including expanded items</small>
+                            </div>
+                        </div>
+                        <div class="pagination-controls" ng-if="vm.totalPages > 1">                    
+                            <button 
+                                class="btn btn-default pagination-btn" 
+                                ng-disabled="vm.currentPage === 1"
+                                ng-click="vm.goToPage(vm.currentPage - 1)">
+                                <i class="icon icon-previous"></i>
+                            </button>
+                            <span class="pagination-page-info">
+                                Page {{vm.currentPage}} of {{vm.totalPages}}
+                            </span>
+                            <button 
+                                class="btn btn-default pagination-btn" 
+                                ng-disabled="vm.currentPage === vm.totalPages"
+                                ng-click="vm.goToPage(vm.currentPage + 1)">
+                                <i class="icon icon-next"></i>
+                            </button>
+                     
+                        </div>
+                        <div class="pagination-size">
+                            <label for="page-size">Root items per page:</label>
+                            <select id="page-size" 
+                                    ng-model="vm.pageSize" 
+                                    ng-change="vm.changePageSize()"
+                                    class="page-size-select">
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Empty state -->
+                <div class="empty-state" ng-if="!vm.loading && (!vm.hierarchyItems || !vm.hierarchyItems.length)">
+                    <div>No dictionary items found</div>
+                    <small ng-if="vm.query">Try different search terms</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Dashboard styling */
+    .custom-translations-dashboard {
+        padding: 20px 0;
+    }
+    
+    .dashboard-header {
+        padding: 0 20px 20px;
+        border-bottom: 1px solid #e9e9eb;
+        margin-bottom: 20px;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 0;
+        color: #1b264f;
+    }
+    
+    .dashboard-header h1 i {
+        margin-right: 10px;
+    }
+    
+    .dashboard-container {
+        padding: 0 20px;
+    }
+    
+    .dashboard-content {
+        background: #fff;
+        border-radius: 3px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .content-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid #e9e9eb;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .content-header h2 {
+        font-size: 18px;
+        margin: 0 0 5px;
+    }
+    
+    .global-create-button {
+        margin-left: auto;
+    }
+    
+    /* Search styling */
+    .search-section {
+        padding: 15px 20px;
+        border-bottom: 1px solid #e9e9eb;
+    }
+    
+    .search-row {
+        display: block;
+        max-width: 600px;
+        margin-bottom: 15px;
+    }
+    
+    .search-label-container {
+        margin-bottom: 8px;
+    }
+    
+    .search-label {
+        display: block;
+        font-weight: bold;
+    }
+    
+    .search-label small {
+        display: block;
+        font-weight: normal;
+        color: #999;
+        margin-top: 2px;
+    }
+    
+    .search-input-container {
+        width: 100%;
+    }
+    
+    .search-input-with-button {
+        display: flex;
+        align-items: center;
+    }
+    
+    .search-input {
+        flex: 1;
+        padding: 6px 10px;
+        border: 1px solid #e9e9eb;
+        border-radius: 3px 0 0 3px;
+        border-right: none;
+        height: 34px;
+    }
+    
+    .search-btn {
+        height: 34px;
+        border-radius: 0 3px 3px 0;
+        padding: 6px 12px;
+        margin: 0;
+    }
+    
+    /* Loading indicator */
+    .loading-indicator {
+        padding: 40px 0;
+        text-align: center;
+    }
+    
+    .spinner {
+        margin: 0 auto 10px;
+        width: 70px;
+        text-align: center;
+    }
+    
+    .spinner > div {
+        width: 12px;
+        height: 12px;
+        background-color: #1b264f;
+        border-radius: 100%;
+        display: inline-block;
+        animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+        margin: 0 2px;
+    }
+    
+    .spinner .bounce1 {
+        animation-delay: -0.32s;
+    }
+    
+    .spinner .bounce2 {
+        animation-delay: -0.16s;
+    }
+    
+    @keyframes sk-bouncedelay {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1.0); }
+    }
+    
+    /* Table styling */
+    .translations-table {
+        padding: 15px 20px;
+    }
+    
+    .full-width-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+    
+    .translations-table th, 
+    .translations-table td {
+        padding: 10px;
+        border: 1px solid #e9e9eb;
+        vertical-align: middle;
+        text-align: left;
+    }
+    
+    .translations-table th {
+        background-color: #f6f6f7;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+    
+    .translations-table td {
+        background-color: #fff;
+    }
+    
+    .translations-table tr:hover td {
+        background-color: #f9f9f9;
+    }
+    
+    /* Column sizing */
+    .translations-table .key-column {
+        width: 30%;
+    }
+    
+    .translations-table .lang-column {
+        width: calc((100% - 30% - 120px) / var(--lang-count, 2));
+    }
+    
+    .translations-table .actions-column {
+        width: 120px;
+        min-width: 120px;
+    }
+    
+    .dictionary-key {
+        font-weight: bold;
+        word-break: break-word;
+    }
+    
+    .key-with-toggle {
+        display: flex;
+        align-items: center;
+    }
+    
+    .btn-toggle {
+        background: none;
+        border: none;
+        padding: 0;
+        margin-right: 5px;
+        cursor: pointer;
+        color: #1b264f;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+    }
+    
+    .key-spacer {
+        width: 20px;
+        display: inline-block;
+    }
+    
+    .translation-value-cell {
+        padding: 5px 10px;
+    }
+    
+    .translation-value {
+        max-height: 60px;
+        overflow: auto;
+        word-break: break-word;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .actions-cell {
+        text-align: center;
+        white-space: nowrap;
+        padding: 5px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 2px;
+    }
+    
+    .btn-sort {
+        border: none;
+        background: transparent;
+        padding: 0;
+        margin-left: 5px;
+        cursor: pointer;
+        color: #1b264f;
+        vertical-align: middle;
+    }
+    
+    .parent-row {
+        background-color: #f9f9f9;
+    }
+    
+    .parent-row td {
+        background-color: #f9f9f9;
+    }
+    
+    .parent-row:hover td {
+        background-color: #f0f0f0;
+    }
+    
+    /* Empty state styling */
+    .empty-state {
+        padding: 40px 0;
+        text-align: center;
+        color: #999;
+    }
+    
+    .empty-state div {
+        font-size: 16px;
+        margin-bottom: 5px;
+    }
+    
+    /* Button styling */
+    .btn-xs {
+        padding: 1px 5px;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+    
+    /* Pagination styling */
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        margin-top: 20px;
+        border-top: 1px solid #e9e9eb;
+    }
+    
+    .pagination-info {
+        color: #666;
+        font-size: 14px;
+    }
+    
+    .pagination-expanded-note {
+        margin-top: 4px;
+        color: #999;
+    }
+    
+    .pagination-controls {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .pagination-btn {
+        padding: 4px 8px;
+        min-width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .pagination-page-info {
+        padding: 0 10px;
+        color: #555;
+        font-size: 14px;
+    }
+    
+    .pagination-size {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .pagination-size label {
+        margin: 0;
+        font-weight: normal;
+        color: #555;
+        font-size: 14px;
+    }
+    
+    .page-size-select {
+        padding: 4px 8px;
+        border: 1px solid #e9e9eb;
+        border-radius: 3px;
+        background-color: #fff;
+        min-width: 70px;
+    }
+</style>
+
+<script>
+    // Set CSS variable for dynamic column width calculation based on language count
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            var langCount = document.querySelectorAll('.translations-table th.lang-column').length;
+            if (langCount > 0) {
+                document.documentElement.style.setProperty('--lang-count', langCount);
+            }
+        }, 500); // Small delay to ensure Angular has rendered the columns
+    });
+</script>

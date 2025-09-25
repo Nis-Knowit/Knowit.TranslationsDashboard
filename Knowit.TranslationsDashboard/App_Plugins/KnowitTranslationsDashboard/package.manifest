@@ -1,0 +1,24 @@
+{
+  "name": "Knowit Translations Dashboard",
+  "version": "1.0.0",
+  "allowPackageTelemetry": true,
+  "bundleOptions": "None",
+  "javascript": [
+    "~/App_Plugins/KnowitTranslationsDashboard/KnowitTranslationsDashboard.controller.js"
+  ],
+  "css": [],
+  "dashboards": [
+    {
+      "alias": "knowitTranslationsDashboard",
+      "view": "~/App_Plugins/KnowitTranslationsDashboard/dashboard.html",
+      "sections": [ "KnowitTranslations" ],
+      "weight": 0
+    }
+  ],
+  "sections": [
+    {
+      "alias": "KnowitTranslations",
+      "name": "Translations"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<ContentTargetFolders>.</ContentTargetFolders>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<PackageId>Knowit.TranslationsDashboard</PackageId>
+		<Version>1.0.3</Version>
+		<Title>Knowit Translations Dashboard</Title>
+		<Description>A translation management dashboard for Umbraco that allows administrators to manage dictionary items in a user-friendly interface with advanced features like hierarchy view, pagination, and search.</Description>
+		<Authors>Knowit</Authors>
+		<PackageTags>umbraco;umbraco-marketplace;translations;dictionary;localization;i18n</PackageTags>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/Nis-Knowit/Knowit.TranslationsDashboard</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/Nis-Knowit/Knowit.TranslationsDashboard</RepositoryUrl>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Umbraco.Cms.Web.Website" Version="[13.0.0,14.0.0)" PrivateAssets="contentfiles;analyzers" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="[13.0.0,14.0.0)" PrivateAssets="contentfiles;analyzers" />
+		<PackageReference Include="Umbraco.Cms.Core" Version="[13.0.0,14.0.0)" PrivateAssets="contentfiles;analyzers" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="icon.png" Pack="true" PackagePath="\" />
+		<None Include="README.md" Pack="true" PackagePath="\" />
+		<None Include="build\**\*.*" Pack="true" PackagePath="build" />
+		<Content Include="App_Plugins\**\*.*" ExcludeFromSingleFile="true" CopyToPublishDirectory="Always" />
+		<None Include="App_Plugins\**\*.*" Pack="true" PackagePath="content\App_Plugins" />
+	</ItemGroup>
+</Project>

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://marketplace.umbraco.com/umbraco-marketplace-schema.json",
+  "Title": "Knowit Translations Dashboard",
+  "Description": "A translation management dashboard for Umbraco that allows administrators to manage dictionary items in a user-friendly interface with advanced features like hierarchy view, pagination, and search.",
+  "Category": "Editor Tools",
+  "Tags": [ "translations", "dictionary", "localization", "i18n" ],
+  "LicenseTypes": [ "Free" ],
+  "AuthorDetails": {
+    "Name": "Knowit",
+    "Url": "https://www.knowit.no/"
+  },
+  "DocumentationUrl": "https://github.com/knowit/umbraco-translations-dashboard",
+  "IssueTrackerUrl": "https://github.com/knowit/umbraco-translations-dashboard/issues",
+  "DiscussionUrl": "https://github.com/knowit/umbraco-translations-dashboard/discussions",
+  "SourceCodeUrl": "https://github.com/knowit/umbraco-translations-dashboard",
+  "ImageUrl": "https://raw.githubusercontent.com/knowit/umbraco-translations-dashboard/main/assets/logo.png",
+  "Screenshots": [
+    {
+      "ImageUrl": "https://raw.githubusercontent.com/knowit/umbraco-translations-dashboard/main/assets/screenshot-1.png",
+      "Caption": "Translation dashboard with hierarchical view"
+    }
+  ],
+  "PackageType": "Package",
+  "MinimumUmbracoVersion": "13.0.0",
+  "VersionSpecificPackageIds": [
+    {
+      "UmbracoMajorVersion": 13,
+      "PackageId": "Knowit.TranslationsDashboard"
+    }
+  ],
+  "Compatibility": {
+    "Platforms": [ "cms" ]
+  }
+}
