@@ -29,6 +29,13 @@ dotnet add package Knowit.TranslationsDashboard
 
 After installation, a new section called "KnowitTranslations" will be available as a section to use on a usergroup.
 
+
+Table overview with values
+<img width="2524" height="943" alt="image" src="https://github.com/user-attachments/assets/2a02c8d2-ae36-4933-a488-5c79e606a119" />
+
+Search directly on the dictionary value (or the key if you want)
+<img width="2498" height="577" alt="image" src="https://github.com/user-attachments/assets/3f2c3487-4c21-4e3b-aecf-2fb5e824c187" />
+
 ### Managing Translations
 
 - **Create new translations**: Click the "Create New Translation" button
